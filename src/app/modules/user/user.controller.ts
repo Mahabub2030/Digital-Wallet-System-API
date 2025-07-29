@@ -19,10 +19,6 @@ const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFun
 
     const query = req.query;
     const result = await UserService.getAllUsers(query as Record <string, string>)
-
-
-
-
      sendResponse(res,{
     success: true,
         statusCode: httpStatus.CREATED,
