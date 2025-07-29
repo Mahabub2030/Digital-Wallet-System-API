@@ -64,3 +64,44 @@ npm install
 ⚙️ Environment Variables
 Create a .env file from .env.example:
 
+🏃 Run the Project
+
+# Start in development mode
+npm run dev
+
+# Build TypeScript
+npm run build
+
+# Run built project
+npm start
+
+
+🧩 Tech Stack
+Backend: Node.js, Express.js
+
+Language: TypeScript
+
+Database: MongoDB (via Mongoose)
+
+Validation: Zod
+
+Authentication: JWT
+
+Dev Tools: ts-node-dev, dotenv
+
+📜 Scripts
+
+npm run dev        # Run in development mode
+npm run build      # Compile TypeScript to JS
+npm start          # Run compiled project
+
+
+🔒 Security
+Passwords hashed using bcrypt
+
+JWT tokens for stateless authentication
+
+Role-based access control via middleware
+
+🪪 License
+MIT © [Mahabub-Alam]
