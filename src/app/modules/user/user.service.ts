@@ -3,6 +3,7 @@ import { IUser } from "./user.interface";
 import { User } from "./user.model";
 
 
+
 const createUser = async(paylode:Partial<IUser>)=>{
     const {email, password} = paylode;
 

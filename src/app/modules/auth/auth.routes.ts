@@ -6,4 +6,4 @@ const router = express.Router();
 
 router.post('/login',AuthControllers.credentialsLogin );
 
-export default router;
+export const AuthRoutes = router;

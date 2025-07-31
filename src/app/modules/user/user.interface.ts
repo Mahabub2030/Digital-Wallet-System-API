@@ -14,23 +14,20 @@ export interface IAuthProvider {
 
 export enum IsActive {
   ACTIVE = "ACTIVE",
-  INACTIVE = "INACTIVE",
+  SUSPENDED = "SUSPENDED",
   BLOCKED = "BLOCKED",
 }
 
 export interface IUser {
-  _id?: Types.ObjectId;
-  name: string;
+   _id?: Types.ObjectId
+   name: string;
   email: string;
-  password?: string;
-  phone?: string;
-  picture?: string;
-  address?: string;
-  isDeleted?: string;
-  isActive?: IsActive;
-  isVerified?: boolean;
+  password: string;
+   isDeleted?: string;
+    isActive?: IsActive;
+    isVerified?: boolean;
   role: Role;
-  auths: IAuthProvider[];
-  // bookings?: Types.ObjectId[]
-  agent?: Types.ObjectId[];
+  status: "ACTIVE" | "BLOCKED" | "SUSPENDED";
+  commissionRate?: number;
+  approved?: boolean;
 }

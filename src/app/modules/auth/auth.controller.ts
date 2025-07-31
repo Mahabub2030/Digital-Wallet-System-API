@@ -12,20 +12,23 @@ import { setAuthCookie } from '../../../utils/setCookie';
 
  const credentialsLogin = catchAsync(async  (req :Request, res :Response, next:NextFunction) => {
     passport.authenticate("local", async(err:any,user: any, info:any) =>{
-        if(err){
-            return next ( new AppError(401,err))
-        }
-          if (!user) {
-            // console.log("from !user");
-            // return new AppError(401, info.message)
-            return next(new AppError(401, info.message))
-        }
+
+   
+        // if(err){
+        //     return next ( new AppError(401,err))
+        // }
+        //   if (!user) {
+        //     // console.log("from !user");
+        //     // return new AppError(401, info.message)
+        //     return next(new AppError(401, info.message))
+        // }
+       
 
         const userTokens = await createUserTokens(user)
 
-        // delete user.toObject().password
+        delete user.toObject().password
 
-        const { password: pass, ...rest } = user.toObject()
+        // const { password: pass, ...rest } = user.toObject()
 
 
         setAuthCookie(res, userTokens)
@@ -37,7 +40,7 @@ import { setAuthCookie } from '../../../utils/setCookie';
             data: {
                 accessToken: userTokens.accessToken,
                 refreshToken: userTokens.refreshToken,
-                user: rest
+                user
 
             },
         })

@@ -1,3 +1,4 @@
+
 import { IWallet, Wallet } from "./wallet.model";
 
 const deposit = async (userId: string, amount: number) => {
@@ -12,8 +13,6 @@ const deposit = async (userId: string, amount: number) => {
 
   return wallet;
 };
-
-
 
 const createWallet = async (payload: IWallet) => {
   const existingWallet = await Wallet.findOne({ userId: payload.userId });
