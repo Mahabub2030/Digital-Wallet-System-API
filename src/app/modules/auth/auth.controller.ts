@@ -10,8 +10,6 @@ import httpStatus from "http-status-codes"
 import { createUserTokens } from '../../../utils/userTokens';
 import { setAuthCookie } from '../../../utils/setCookie';
 
-
-
  const credentialsLogin = catchAsync(async  (req :Request, res :Response, next:NextFunction) => {
     passport.authenticate("local", async(err:any,user: any, info:any) =>{
         if(err){
