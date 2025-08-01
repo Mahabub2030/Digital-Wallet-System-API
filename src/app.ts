@@ -9,7 +9,7 @@ import { walletRoutes } from "./app/modules/wallet/wallet.routes";
 import cookieParser from "cookie-parser";
 
 // IMPORTANT: Import your passport configuration here to register strategies BEFORE using passport middleware
-import "./app/config/passport";  // Adjust the path to where your passport config file is
+
 
 const app = express();
 
