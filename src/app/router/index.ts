@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { UserRoutes } from "../modules/user/user.route";
-import { walletRoutes } from "../modules/wallet/wallet.routes";
 import { AuthRoutes } from "../modules/auth/auth.routes";
+import { walletRoutes } from "../modules/wallet/wallet.routes";
+import { transactionRoutes } from "../modules/transaction/transaction.routes";
 
-const router = Router();
+export const router = Router();
 
 
 const modulesRoutes = [
@@ -13,16 +14,18 @@ const modulesRoutes = [
   },
   {
     path: "/auth",
-    router: AuthRoutes,
+    router: AuthRoutes
   },
   {
-    path: "/deposit",
+    path: "/wallet",
     router: walletRoutes
   },
   {
-    path: "/wallets",
-    router: walletRoutes
-  }
+    path: "/transactions",
+    router: transactionRoutes
+  },
+  
+  
   ];
 modulesRoutes.forEach((route) => {
     router.use(route.path, route.router)

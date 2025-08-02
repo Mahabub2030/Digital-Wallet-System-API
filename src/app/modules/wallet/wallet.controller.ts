@@ -1,43 +1,36 @@
-import { NextFunction, Request, Response } from "express";
-import { catchAsync } from "../../../utils/catchAsync";
-import { WalletService } from "./wallet.service";
+import { Request ,Response} from "express";
 import { sendResponse } from "../../../utils/sendResponse";
-import { IWallet, Wallet } from "./wallet.model";
 
-import httpStatus from "http-status-codes";
+import httpStatus from "http-status-codes"
+import AppError from "../../errorHelpers/AppError";
+import { Wallet } from "./wallet.model";
 
-const depositMoney = catchAsync(async (req: Request, res: Response) => {
-  const { userId, amount } = req.body;
+const getMyWallet = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  console.log('Controller - req.user:', req.user);
+  console.log(userId)
 
-  const result = await WalletService.deposit(userId, amount);
+  if (!userId) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'User not authenticated');
+  }
+
+  const wallet = await Wallet.findOne({ userId });
+  console.log(wallet)
+
+  if (!wallet) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Wallet not found');
+  }
 
   sendResponse(res, {
-    statusCode: 200,
     success: true,
-    message: "Deposit successful",
-    data: result,
+    statusCode: httpStatus.OK,
+    message: "Get My Wallet Successfully✅",
+    data: wallet,
   });
-});
-
-const createWallet = catchAsync(async(req:Request,res:Response,next:NextFunction) =>{
-    try {
-      
-      const result = await WalletService.createWallet(req.body);
-      
-  sendResponse(res, {
-        success: true,
-        statusCode: httpStatus.CREATED,
-        message: "Wallet Created Successfully",
-        data: result,
-    })
-
-    } catch (error) {
-      next(error);
-    }
-
-})
-
-export const WalletController = {
-  depositMoney,
-  createWallet
 };
+
+
+export const WalletController ={
+  getMyWallet
+}
+

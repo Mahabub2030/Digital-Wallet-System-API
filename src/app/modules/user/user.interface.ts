@@ -1,33 +1,33 @@
-import { Types } from "mongoose";
+
 
 export enum Role {
-  SUPER_ADMIN = "SUPER_ADMIN",
+  SUPAR_ADMIN = "SUPAR_ADMIN",
   ADMIN = "ADMIN",
-  USER = "USER",
   AGENT = "AGENT",
+  USER = "USER",
 }
-
-export interface IAuthProvider {
-  provider: "google" | "credentials"; // "Google", "Credential"
-  providerId: string;
-}
-
 export enum IsActive {
   ACTIVE = "ACTIVE",
   SUSPENDED = "SUSPENDED",
   BLOCKED = "BLOCKED",
 }
 
+
+export interface  IAuthProvider{
+    provider :string
+    providerId:string
+}
+
+
 export interface IUser {
-   _id?: Types.ObjectId
-   name: string;
+  name: string;
   email: string;
   password: string;
-   isDeleted?: string;
-    isActive?: IsActive;
-    isVerified?: boolean;
+  phone?: string;
+  picture?: string;
   role: Role;
-  status: "ACTIVE" | "BLOCKED" | "SUSPENDED";
-  commissionRate?: number;
-  approved?: boolean;
+  auths:IAuthProvider[]
+  isApproved?: string;
+  isDeteted?: string;
+  IsActive?:IsActive
 }

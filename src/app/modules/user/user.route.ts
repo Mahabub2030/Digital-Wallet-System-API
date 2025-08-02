@@ -1,11 +1,39 @@
-import { Router } from "express";
+import { NextFunction, Request, Response, Router } from "express";
 import { UserControllers } from "./user.controller";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import AppError from "../../errorHelpers/AppError";
+import { Role } from "./user.interface";
+const router = Router();
+
+router.post("/register", UserControllers.createUser);
+
+router.get(
+  "/all-users",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const accessToken = req.headers.authorization;
+
+      if (!accessToken) {
+        throw new AppError(403, "No Have accessToken");
+      }
 
 
-const router = Router()
+      const verifiedToken = jwt.verify(accessToken, "secret");
 
-router.post('/register', UserControllers.createUser)
+      if (!verifiedToken) {
+        throw new AppError(403, `No Have access${verifiedToken}`);
+      }
 
-router.get('/all-users',UserControllers.getAllUsers)
+      if ((verifiedToken as JwtPayload).role !== Role.ADMIN || Role.SUPAR_ADMIN) {
+      }
+      console.log(verifiedToken);
+      next();
+    } catch (error) {
+      next(error);
+    }
+  },
 
-export const UserRoutes = router
+  UserControllers.getAllUsers
+);
+
+export const UserRoutes = router;

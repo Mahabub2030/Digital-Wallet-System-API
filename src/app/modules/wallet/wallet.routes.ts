@@ -1,8 +1,13 @@
 import express from "express";
 import { WalletController } from "./wallet.controller";
+import { auth } from "../../middlewares/auth";
+
+
 
 export const walletRoutes = express.Router();
 
 
-walletRoutes.post("/",WalletController.createWallet);
-walletRoutes.post("/deposit",WalletController.depositMoney);
+walletRoutes.get("/me",auth,
+
+    WalletController.getMyWallet);
+

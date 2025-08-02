@@ -1,46 +1,32 @@
-import bcrypt from "bcrypt";
-import { model, Schema, Document } from "mongoose";
+import { model, Schema } from "mongoose";
+import { IAuthProvider, IsActive, Role } from "./user.interface";
 
-export enum Role {
-  ADMIN = "admin",
-  USER = "user",
-  AGENT = "agent",
-}
+const authProviderSchema = new Schema<IAuthProvider>(
+  {
+    provider: { type: String, required: true },
+    providerId: { type: String, required: true },
+  },
+  { versionKey: false, _id: false }
+);
 
-export interface IUser {
-  name: string;
-  email: string;
-  password: string;
-  role: Role;
-  status: "ACTIVE" | "BLOCKED" | "SUSPENDED";  // Use consistent casing as in schema
-  commissionRate?: number;
-  approved?: boolean;
-  comparePassword(candidatePassword: string): Promise<boolean>;
-}
+const userSchema = new Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String },
+    phone: { type: Number },
+    role: { type: String, enum: Object.values(Role), default: Role.USER },
+    picture: { type: String },
+    isDeteted: { type: Boolean, default: false },
+    IsActive: {
+      type: String,
+      enum: Object.values(IsActive),
+      default: IsActive.ACTIVE,
+    },
+    isApproved: { type: Boolean, default: false },
+    auths: [authProviderSchema],
+  },
+  { timestamps: true, versionKey: false }
+);
 
-// Extend Document with IUser properties and methods
-export interface IUserDocument extends IUser, Document { }
-
-const UserSchema = new Schema<IUserDocument>({
-  name: { type: String },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  role: { type: String, enum: Object.values(Role), default: Role.USER },
-  status: { type: String, enum: ["ACTIVE", "BLOCKED", "SUSPENDED"], default: "ACTIVE" },
-  commissionRate: { type: Number, default: 0 },
-  approved: { type: Boolean, default: false }, // for agents
-}, { timestamps: true, versionKey: false });
-
-// Hash password before save
-UserSchema.pre<IUserDocument>("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
-
-UserSchema.methods.comparePassword = function (candidatePassword: string): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password);
-};
-
-export const User = model<IUserDocument>("User", UserSchema);
+export const User = model("User", userSchema);

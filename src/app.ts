@@ -7,6 +7,7 @@ import { envVars } from "./app/config/env";
 import expressSession from "express-session";
 import { walletRoutes } from "./app/modules/wallet/wallet.routes";
 import cookieParser from "cookie-parser";
+import { UserRoutes } from "./app/modules/user/user.route";
 
 // IMPORTANT: Import your passport configuration here to register strategies BEFORE using passport middleware
 
@@ -31,7 +32,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/api/v1", router);
-app.use("/api/v1/wallet", walletRoutes);
+
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({

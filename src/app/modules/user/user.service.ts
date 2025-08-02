@@ -9,9 +9,9 @@ const createUser = async(paylode:Partial<IUser>)=>{
 
 const isUserExit = await User.findOne({email})
 
-// if(isUserExit){
-//     throw new Error("User Already Exit")
-// }
+if(isUserExit){
+    throw new Error("User Already Exit")
+}
 
 
     const user = await  User.create({

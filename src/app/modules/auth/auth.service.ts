@@ -1,5 +1,3 @@
-
-
 import AppError from "../../errorHelpers/AppError";
 import { IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
@@ -7,8 +5,6 @@ import bcryptjs from "bcryptjs"
 import httpstatuscode from 'http-status-codes'
 
 import jwt, { JwtPayload } from 'jsonwebtoken';
-
-
 
 const credentialsLogin = async (payload:Partial<IUser>)=>{
     const {email, password} = payload;
