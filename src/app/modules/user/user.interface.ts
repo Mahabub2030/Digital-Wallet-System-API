@@ -27,7 +27,7 @@ export interface IUser {
   picture?: string;
   role: Role;
   auths:IAuthProvider[]
-  isApproved?: string;
+  isApproved?: boolean;
   isDeteted?: string;
   IsActive?:IsActive
 }

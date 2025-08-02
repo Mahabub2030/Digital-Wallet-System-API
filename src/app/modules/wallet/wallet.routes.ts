@@ -1,13 +1,15 @@
-import express from "express";
-import { WalletController } from "./wallet.controller";
-import { auth } from "../../middlewares/auth";
+
+
+import express from 'express';
+
+import { getMyWallet, walletControler,  } from './wallet.controller';
+import { authorize } from 'passport';
 
 
 
-export const walletRoutes = express.Router();
+const router = express.Router();
 
+router.get('/me', getMyWallet);
+router.patch('/block/:id', walletControler.toggleWalletBlock );
 
-walletRoutes.get("/me",auth,
-
-    WalletController.getMyWallet);
-
+export const WalletRouer =  router;

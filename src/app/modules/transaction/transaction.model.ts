@@ -1,29 +1,38 @@
-// src/modules/transaction/transaction.model.ts
-import mongoose, { Schema, Document, Types } from "mongoose";
+import { Schema, model } from 'mongoose';
 
-export type TransactionType = "top-up" | "withdraw" | "send" | "cash-in" | "cash-out";
+const transactionSchema = new Schema(
+  {
+    type: {
+      type: String,
+      enum: ['deposit', 'withdraw', 'send'],
+      required: true,
+    },
+    amount: {
+      type: Number,
+      required: true,
+    },
+    from: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    to: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    status: {
+      type: String,
+      enum: ['success', 'failed', 'pending'],
+      default: 'success',
+    },
+    method: {
+      type: String,
+      enum: ['wallet', 'bank', 'agent'],
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-export interface ITransaction extends Document {
-  walletId: Types.ObjectId;
-  type: TransactionType;
-  amount: number;
-  fee?: number;
-  commission?: number;
-  initiatedBy: Types.ObjectId;
-  receiverWalletId?: Types.ObjectId;
-  status: "pending" | "completed" | "reversed";
-  createdAt: Date;
-}
-
-const TransactionSchema = new Schema<ITransaction>({
-  walletId: { type: Schema.Types.ObjectId, ref: "Wallet", required: true },
-  type: { type: String, enum: ["top-up", "withdraw", "send", "cash-in", "cash-out"], required: true },
-  amount: { type: Number, required: true },
-  fee: { type: Number, default: 0 },
-  commission: { type: Number, default: 0 },
-  initiatedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  receiverWalletId: { type: Schema.Types.ObjectId, ref: "Wallet" },
-  status: { type: String, enum: ["pending", "completed", "reversed"], default: "completed" },
-}, { timestamps: true });
-
-export default mongoose.model<ITransaction>("Transaction", TransactionSchema);
+export const Transaction = model('Transaction', transactionSchema);

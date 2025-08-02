@@ -1,6 +1,7 @@
 import { Server } from "http";
 import mongoose from "mongoose";
 import app from "./app";
+import { seedSuperAdmin } from "./utils/seedSuperAdmin";
 
 // import { envVars } from "./config/env";
 const PORT = process.env.PORT || 9000;
@@ -22,6 +23,7 @@ const startServer = async () => {
 };
 (async () => {
   await startServer();
+  await seedSuperAdmin()
 })();
 
 // Error Handling below

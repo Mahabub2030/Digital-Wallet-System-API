@@ -1,36 +1,41 @@
-import { Request ,Response} from "express";
-import { sendResponse } from "../../../utils/sendResponse";
-
-import httpStatus from "http-status-codes"
-import AppError from "../../errorHelpers/AppError";
+import { NextFunction, Request, Response } from "express";
 import { Wallet } from "./wallet.model";
+import { sendResponse } from "../../../utils/sendResponse";
+import { catchAsync } from "../../../utils/catchAsync";
 
-const getMyWallet = async (req: Request, res: Response) => {
-  const userId = req.user?.id;
-  console.log('Controller - req.user:', req.user);
-  console.log(userId)
+import httpStatusCode  from "http-status-codes";
+import { WallerServices } from "./wallet.service";
 
-  if (!userId) {
-    throw new AppError(httpStatus.BAD_REQUEST, 'User not authenticated');
-  }
 
-  const wallet = await Wallet.findOne({ userId });
-  console.log(wallet)
-
-  if (!wallet) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Wallet not found');
-  }
-
+ export const getMyWallet = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const userId :any = req.user?.id
+  const wallet = await WallerServices.getWalletByUserId(req.user?.userId);
   sendResponse(res, {
     success: true,
-    statusCode: httpStatus.OK,
-    message: "Get My Wallet Successfully✅",
+    statusCode: httpStatusCode.OK,
+    message: 'Wallet fetched successfully',
+    data: wallet,
+  });
+});
+
+const toggleWalletBlock = async (req: Request, res: Response) => {
+
+  const userId :any = req.user?.id
+  const wallet = await Wallet.findById(userId);
+//   console.log(wallet)
+//   if (!wallet) return res.status(404).json({ message: 'Wallet not found' });
+
+//   wallet.blocked = !wallet.blocked;
+//   await wallet.save();
+
+ sendResponse(res, {
+    success: true,
+    statusCode: httpStatusCode.OK,
+    message: 'Wallet Bloked successfully',
     data: wallet,
   });
 };
 
-
-export const WalletController ={
-  getMyWallet
+export const  walletControler = {
+toggleWalletBlock
 }
-
