@@ -7,8 +7,8 @@ import httpStatusCode  from "http-status-codes";
 import { WallerServices } from "./wallet.service";
 
 
- export const getMyWallet = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const userId :any = req.user?.id
+ const getMyWallet = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const userId  = req.user?.userId
   const wallet = await WallerServices.getWalletByUserId(req.user?.userId);
   sendResponse(res, {
     success: true,
@@ -37,5 +37,6 @@ const toggleWalletBlock = async (req: Request, res: Response) => {
 };
 
 export const  walletControler = {
+  getMyWallet,
 toggleWalletBlock
 }

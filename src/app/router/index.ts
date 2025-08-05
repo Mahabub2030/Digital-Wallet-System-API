@@ -21,10 +21,7 @@ const modulesRoutes = [
     path: "/wallet",
     router: WalletRouer
   },
-  {
-    path: "/transactions",
-    router: transactionRoutes
-  },
+ 
   
   
   ];

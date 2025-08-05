@@ -1,7 +1,12 @@
 import { Schema, model } from 'mongoose';
 
-export const transactionTypes = ['send', 'withdraw', 'deposit'] as const;
-export type TransactionType = typeof transactionTypes[number];
+export const transactionTypes = {
+  SEND: "send",
+  WITHDRAW: "withdraw",
+  DEPOSIT: "deposit",
+} as const;
+
+export type TransactionType = typeof transactionTypes;
 
 export interface ITransaction {
   sender: string; // user ID
@@ -10,6 +15,7 @@ export interface ITransaction {
   type: TransactionType;
   status: 'success' | 'failed' | 'pending';
 }
+
 
 const transactionSchema = new Schema<ITransaction>(
   {

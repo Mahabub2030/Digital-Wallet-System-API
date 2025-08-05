@@ -8,6 +8,10 @@ import { Wallet } from "./wallet.model";
 }
 
 
+
+
+
+
 export const WallerServices = {
   getWalletByUserId
 

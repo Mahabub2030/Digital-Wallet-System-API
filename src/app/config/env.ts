@@ -17,12 +17,6 @@ interface EnvConfig {
     GOOGLE_CALLBACK_URL: string
     EXPRESS_SESSION_SECRET: string
     FRONTEND_URL: string
-
-    CLOUDINARY: {
-        CLOUDINARY_CLOUD_NAME: string;
-        CLOUDINARY_API_KEY: string;
-        CLOUDINARY_API_SECRET: string;
-    };
     EMAIL_SENDER: {
         SMTP_USER: string;
         SMTP_PASS: string;
@@ -36,9 +30,7 @@ interface EnvConfig {
     REDIS_PASSWORD: string;
 }
 const loadEnvVariables = (): EnvConfig => {
-    const requiredEnvVariables: string[] = ["PORT", "DB_URL", "NODE_ENV", "BCRYPT_SALT_ROUND", "JWT_ACCESS_EXPIRES", "JWT_ACCESS_SECRET", "SUPER_ADMIN_EMAIL", "SUPER_ADMIN_PASSWORD", "JWT_REFRESH_SECRET", "JWT_REFRESH_EXPIRES", "GOOGLE_CLIENT_SECRET", "GOOGLE_CLIENT_ID", "GOOGLE_CALLBACK_URL", "EXPRESS_SESSION_SECRET", "FRONTEND_URL", "CLOUDINARY_CLOUD_NAME",
-        "CLOUDINARY_API_KEY",
-        "CLOUDINARY_API_SECRET", "SMTP_PASS",
+    const requiredEnvVariables: string[] = ["PORT", "DB_URL", "NODE_ENV", "BCRYPT_SALT_ROUND", "JWT_ACCESS_EXPIRES", "JWT_ACCESS_SECRET", "SUPER_ADMIN_EMAIL", "SUPER_ADMIN_PASSWORD", "JWT_REFRESH_SECRET", "JWT_REFRESH_EXPIRES", "GOOGLE_CLIENT_SECRET", "GOOGLE_CLIENT_ID", "GOOGLE_CALLBACK_URL", "EXPRESS_SESSION_SECRET", "FRONTEND_URL","SMTP_PASS",
         "SMTP_PORT",
         "SMTP_HOST",
         "SMTP_USER",
@@ -70,12 +62,6 @@ const loadEnvVariables = (): EnvConfig => {
         GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL as string,
         EXPRESS_SESSION_SECRET: process.env.EXPRESS_SESSION_SECRET as string,
         FRONTEND_URL: process.env.FRONTEND_URL as string,
-     
-        CLOUDINARY: {
-            CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,
-            CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
-            CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
-        },
         EMAIL_SENDER: {
             SMTP_USER: process.env.SMTP_USER as string,
             SMTP_PASS: process.env.SMTP_PASS as string,

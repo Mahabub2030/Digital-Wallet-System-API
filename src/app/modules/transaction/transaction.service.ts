@@ -1,67 +1,68 @@
+import mongoose from "mongoose";
+import { ITransaction, Transaction, transactionTypes } from "./transaction.interface";
+import { Wallet } from "../wallet/wallet.model";
+import AppError from "../../errorHelpers/AppError";
+import httpStatus from "http-status-codes";
 
-import { Wallet } from '../wallet/wallet.model';
-import mongoose from 'mongoose';
-import { transactionTypes } from './transaction.interface';
-import { Transaction } from './transaction.model';
+const createTransactionService = async (
+  payload: Partial<ITransaction>,
+  senderId: string,
+  receiverId: string,
+  amount: number,
+  type: keyof typeof transactionTypes ,
+) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-export const TransactionService = {
-  async sendMoney(fromUserId: string, toUserId: string, amount: number) {
-    const session = await mongoose.startSession();
-    session.startTransaction();
+  try {
+    const senderWallet = await Wallet.findOne({ user: senderId }).session(session);
+    const receiverWallet = await Wallet.findOne({ user: receiverId }).session(session);
 
-    try {
-      const senderWallet = await Wallet.findOne({ user: fromUserId }).session(session);
-      const receiverWallet = await Wallet.findOne({ user: toUserId }).session(session);
-
-      if (!senderWallet || !receiverWallet) throw new Error('Wallets not found');
-      if (senderWallet.balance < amount) throw new Error('Insufficient balance');
-
-      senderWallet.balance -= amount;
-      receiverWallet.balance += amount;
-
-      await senderWallet.save({ session });
-      await receiverWallet.save({ session });
-
-      const transaction = await Transaction.create(
-        [{ type: transactionTypes, amount, from: fromUserId, to: toUserId }],
-        { session }
-      );
-
-      await session.commitTransaction();
-      session.endSession();
-
-      return transaction[0];
-    } catch (error) {
-      await session.abortTransaction();
-      session.endSession();
-      throw error;
+    if (!senderWallet || !receiverWallet) {
+      throw new AppError(httpStatus.BAD_REQUEST, "One or both wallets not found");
     }
-  },
 
-  async deposit(userId: string, amount: number) {
-    const wallet = await Wallet.findOne({ user: userId });
-    if (!wallet) throw new Error('Wallet not found');
+    if (senderWallet.balance < amount) {
+      throw new AppError(httpStatus.BAD_REQUEST, "Insufficient balance");
+    }
 
-    wallet.balance += amount;
-    await wallet.save();
+    // Deduct from sender
+    senderWallet.balance -= amount;
 
-    return Transaction.create({ type: TransactionType.DEPOSIT, amount, to: userId });
-  },
+    // Add to receiver
+    receiverWallet.balance += amount;
 
-  async withdraw(userId: string, amount: number) {
-    const wallet = await Wallet.findOne({ user: userId });
-    if (!wallet) throw new Error('Wallet not found');
-    if (wallet.balance < amount) throw new Error('Insufficient balance');
+    // Save both wallets
+    await senderWallet.save({ session });
+    await receiverWallet.save({ session });
 
-    wallet.balance -= amount;
-    await wallet.save();
+    // Create transaction record
+    const transaction = await Transaction.create(
+      [
+        {
+          type: type, // use the parameter passed
+          amount,
+          from: senderId,
+          to: receiverId,
+          ...payload,
+        },
+      ],
+      { session }
+    );
 
-    return Transaction.create({ type: transactionTypes.WITHDRAW, amount, from: userId });
-  },
+    await session.commitTransaction();
+    session.endSession();
 
-  async getMyTransactions(userId: string) {
-    return Transaction.find({ $or: [{ from: userId }, { to: userId }] })
-      .sort({ createdAt: -1 })
-      .populate('from to', 'name');
-  },
+    return transaction[0];
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    console.error("Transaction error:", error);
+    throw error;
+  }
+};
+
+export const  createTransactionServices ={
+    createTransactionService,
+
 };
