@@ -1,68 +1,46 @@
-import mongoose from "mongoose";
-import { ITransaction, Transaction, transactionTypes } from "./transaction.interface";
-import { Wallet } from "../wallet/wallet.model";
+import { session } from "passport";
 import AppError from "../../errorHelpers/AppError";
-import httpStatus from "http-status-codes";
+import { User } from "../user/user.model";
+import { Wallet } from "../wallet/wallet.model";
+import { ITransaction, Transaction } from "./transaction.interface";
+import httpStatus from "http-status-codes"
+import { Request } from "express";
 
-const createTransactionService = async (
+
+const AddMoneycreate = async (
   payload: Partial<ITransaction>,
-  senderId: string,
-  receiverId: string,
-  amount: number,
-  type: keyof typeof transactionTypes ,
+  userId: String,
+  res:Response,req:Request
 ) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
+const user = await User.findById(userId)
+const {amount} = req.body
 
-  try {
-    const senderWallet = await Wallet.findOne({ user: senderId }).session(session);
-    const receiverWallet = await Wallet.findOne({ user: receiverId }).session(session);
+if(!user?.isBlocked || !user.isDeteted){
+  throw new AppError(httpStatus.BAD_REQUEST,"You are not allowed")
+}
 
-    if (!senderWallet || !receiverWallet) {
-      throw new AppError(httpStatus.BAD_REQUEST, "One or both wallets not found");
-    }
+ const wallet = await Wallet.findById({user:userId}).session(session)
 
-    if (senderWallet.balance < amount) {
-      throw new AppError(httpStatus.BAD_REQUEST, "Insufficient balance");
-    }
+ if(!wallet || wallet.isBlocked) {
+  throw new  AppError (httpStatus.BAD_REQUEST,"your wallet blocked")
+ }
 
-    // Deduct from sender
-    senderWallet.balance -= amount;
+ wallet.balance += amount;
 
-    // Add to receiver
-    receiverWallet.balance += amount;
 
-    // Save both wallets
-    await senderWallet.save({ session });
-    await receiverWallet.save({ session });
+const addMoney = await Transaction.create({
+  user:userId,
+  type:"add",
+  amount,
+  status:"pending",
+  ...payload,
+ 
+})
 
-    // Create transaction record
-    const transaction = await Transaction.create(
-      [
-        {
-          type: type, // use the parameter passed
-          amount,
-          from: senderId,
-          to: receiverId,
-          ...payload,
-        },
-      ],
-      { session }
-    );
-
-    await session.commitTransaction();
-    session.endSession();
-
-    return transaction[0];
-  } catch (error) {
-    await session.abortTransaction();
-    session.endSession();
-    console.error("Transaction error:", error);
-    throw error;
-  }
-};
-
-export const  createTransactionServices ={
-    createTransactionService,
+return  addMoney
 
 };
+
+export const TransactionService ={
+  AddMoneycreate
+}

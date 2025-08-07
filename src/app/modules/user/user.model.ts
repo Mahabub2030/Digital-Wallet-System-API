@@ -17,7 +17,9 @@ const userSchema = new Schema(
     phone: { type: Number },
     role: { type: String, enum: Object.values(Role), default: Role.USER },
     picture: { type: String },
-    isDeteted: { type: Boolean, default: false },
+    isDeteted: { type: Boolean, default: 
+      false },
+       isBlocked: { type: Boolean, default: false },
     IsActive: {
       type: String,
       enum: Object.values(IsActive),

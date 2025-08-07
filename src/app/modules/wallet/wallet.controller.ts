@@ -1,16 +1,16 @@
 import { NextFunction, Request, Response } from "express";
-import { Wallet } from "./wallet.model";
 import { sendResponse } from "../../../utils/sendResponse";
 import { catchAsync } from "../../../utils/catchAsync";
 
 import httpStatusCode  from "http-status-codes";
 import { toggleWalletBlockService, WallerServices } from "./wallet.service";
-import { HttpStatusCode } from "axios";
 
 
- const getMyWallet = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const userId  = req.user?.userId
+ const getMyWallet = catchAsync(async (req: Request, res: Response, next: NextFunction ) => {
+  const userId  = req.user?.userId 
   const wallet = await WallerServices.getWalletByUserId(req.user?.userId);
+
+
   sendResponse(res, {
     success: true,
     statusCode: httpStatusCode.OK,
@@ -19,25 +19,13 @@ import { HttpStatusCode } from "axios";
   });
 });
 
-interface CustomRequest extends Request {
-  user?: {
-    id: string;
-    role: string;
-  };
-}
-
-// src/modules/wallet/wallet.service.ts
 
 
 
-interface CustomRequest extends Request {
-  user?: {
-    id: string;
-    role: string;
-  };
-}
 
-export const toggleWalletBlock = catchAsync(async (req: CustomRequest, res: Response) => {
+
+
+export const toggleWalletBlock = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?.id;
 
   if (!userId) {

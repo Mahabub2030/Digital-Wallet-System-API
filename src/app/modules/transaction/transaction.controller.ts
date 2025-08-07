@@ -1,14 +1,29 @@
 import { Request } from "express";
-import { catchAsync } from "../../../utils/catchAsync";
 import { sendResponse } from "../../../utils/sendResponse";
-
-
 import httpStatus from "http-status-codes";
-import { createTransactionServices } from "./transaction.service";
+import { TransactionService } from "./transaction.service";
+
+
+
+const AddMoney = async (req :Request,res:Response) =>{
+
+  const addMoney = await TransactionService.AddMoneycreate()
+
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'Money Added successfully',
+    data: addMoney,
+  });
+
+
+
+}
 
 
 // POST /transaction/deposit
-export const depositMoney =  (async (req: Request, res: Response ) => {
+const depositMoney =  (async (req: Request, res: Response ) => {
 
     
   const userId = req.user?.id; // Use optional chaining in case `user` is undefined
@@ -28,3 +43,9 @@ export const depositMoney =  (async (req: Request, res: Response ) => {
     data: result,
   });
 });
+
+export const TransactionControlers ={
+  AddMoney,
+ 
+
+}
