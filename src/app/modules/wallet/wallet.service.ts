@@ -18,22 +18,17 @@ const addMoney = async (
 ) => {
 const user = await User.findById(userId)
 
-if(!user?.isBlocked || !user.isDeteted){
+if(!user?.IsActive || !user.isAgentApproved){
   throw new AppError(httpStatusCode.BAD_REQUEST,"You are not allowed")
 }
 
 const AddMoney = await Wallet.create({
   user:userId
-  ...payload
 })
 
 return {}
 
 };
-
-
-
-
 
 
 

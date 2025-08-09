@@ -13,10 +13,6 @@ import { AuthControllers } from "../auth/auth.controller";
 const router = Router();
 
 
-
-
-
-
 router.post("/register", UserControllers.createUser);
 
 router.get(

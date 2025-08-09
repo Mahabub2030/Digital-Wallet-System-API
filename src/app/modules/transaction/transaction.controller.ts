@@ -5,21 +5,22 @@ import { TransactionService } from "./transaction.service";
 
 
 
-const AddMoney = async (req :Request,res:Response) =>{
+const AddMoney = async (req: Request, res: Response) => {
+  try {
+    const amountData = req.body; // whatever the client sends
+    const addMoney = await TransactionService.AddMoneycreate(amountData); // ✅ pass the data
 
-  const addMoney = await TransactionService.AddMoneycreate()
-
-
-  sendResponse(res, {
-    success: true,
-    statusCode: httpStatus.OK,
-    message: 'Money Added successfully',
-    data: addMoney,
-  });
-
-
-
-}
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: 'Money Added successfully',
+      data: addMoney,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 
 // POST /transaction/deposit

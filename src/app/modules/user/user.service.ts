@@ -1,6 +1,6 @@
 import { JwtPayload } from "jsonwebtoken";
 import { QueryBuilder } from "../../../utils/QueryBuilder";
-import { IUser, Role } from "./user.interface";
+import { IAuthProvider, IUser, Role } from "./user.interface";
 import { User } from "./user.model";
 import AppError from "../../errorHelpers/AppError";
 import bcryptjs from "bcryptjs"
@@ -8,7 +8,7 @@ import httpstatuscode from "http-status-codes";
 import { envVars } from "../../config/env";
 
 const createUser = async (paylode: Partial<IUser>) => {
-  const { email, password } = paylode;
+  const { email, password,...rest } = paylode;
 
   const isUserExit = await User.findOne({ email });
 
@@ -16,9 +16,15 @@ const createUser = async (paylode: Partial<IUser>) => {
     throw new Error("User Already Exit");
   }
 
+  const hashedPassword = await bcryptjs.hash(password as string, Number(envVars.BCRYPT_SALT_ROUND))
+
+  const authProvider :IAuthProvider={
+    provider:"credentials", providerId: email as string
+  }
   const user = await User.create({
     email,
-    password,
+    password:hashedPassword,
+    auths:[authProvider]
   });
   return user;
 };
@@ -45,7 +51,7 @@ const updateUser = async (
 
         }
     }
-    if(payload.IsActive || payload.isDeteted || payload.isApproved){
+    if(payload.IsActive || payload.isApproved || payload.isApproved){
         if(decodeToken.role === Role.USER || decodeToken.role ===Role.AGENT){
             throw new AppError(httpstatuscode.FORBIDDEN,"You are not authorized")
         }

@@ -1,4 +1,4 @@
-
+import { Types } from "mongoose";
 
 export enum Role {
   SUPAR_ADMIN = "SUPAR_ADMIN",
@@ -12,22 +12,19 @@ export enum IsActive {
   BLOCKED = "BLOCKED",
 }
 
-
-export interface  IAuthProvider{
-    provider :string
-    providerId:string
+export interface IAuthProvider {
+  provider: string;
+  providerId: string;
 }
 
-
 export interface IUser {
+  userId?:Types.ObjectId
   name: string;
   email: string;
   password: string;
-  phone?: string;
-  picture?: string;
   role: Role;
-  auths:IAuthProvider[]
+  auths: IAuthProvider[];
   isApproved?: boolean;
-  isDeteted?: string;
-  IsActive?:IsActive
+  IsActive?: IsActive;
+  createdAt: Date;
 }
