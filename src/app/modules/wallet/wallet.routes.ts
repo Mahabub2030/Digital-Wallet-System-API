@@ -1,18 +1,13 @@
-
-
 import express from 'express';
-
-
 import { checkAuth } from '../../middlewares/checkAuth';
 import { Role } from '../user/user.interface';
 import { walletControler } from './wallet.controller';
 
 
 
-
 const router = express.Router();
 
-router.get('/me',checkAuth(...Object.values(Role)),walletControler.getMyWallet);
+router.get('/me',checkAuth(...Object.values(Role)),walletControler.getWallet);
 router.patch('/wallet/:id',checkAuth(...Object.values(Role.ADMIN)) ,walletControler.toggleWalletBlock );
 
 export const WalletRouer =  router;

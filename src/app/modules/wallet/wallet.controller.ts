@@ -2,48 +2,61 @@ import { NextFunction, Request, Response } from "express";
 import { sendResponse } from "../../../utils/sendResponse";
 import { catchAsync } from "../../../utils/catchAsync";
 
-import httpStatusCode  from "http-status-codes";
-import { toggleWalletBlockService, WallerServices } from "./wallet.service";
+import httpStatusCode from "http-status-codes";
+import { toggleWalletBlockService} from "./wallet.service";
+import { Wallet } from "./wallet.model";
 
+const getWallet = async <IWallet>(req: Request, res: Response) => {
 
- const getMyWallet = catchAsync(async (req: Request, res: Response, next: NextFunction ) => {
-  const userId  = req.user?.userId 
-  const wallet = await WallerServices.getWalletByUserId(req.user?.userId);
-
+  const userId = req.params.body;
+  const wallet = await Wallet.findOne({ userId });
 
   sendResponse(res, {
     success: true,
     statusCode: httpStatusCode.OK,
-    message: 'Wallet fetched successfully',
+    message: "Wallet fetched successfully",
     data: wallet,
   });
-});
+};
 
+export const toggleWalletBlock = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      res.status(401).json({ message: "Unauthorized access" });
+      return;
+    }
 
+    const wallet = await toggleWalletBlockService(userId);
 
-
-
-
-
-export const toggleWalletBlock = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user?.id;
-
-  if (!userId) {
-    res.status(401).json({ message: 'Unauthorized access' });
-    return;
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatusCode.OK,
+      message: "Wallet blocked status toggled successfully",
+      data: wallet,
+    });
   }
+);
 
-  const wallet = await toggleWalletBlockService(userId);
+const addedMoney = catchAsync(async (req, res,tx:any) => {
+  const userId = req.body;
+
+  const amount = Number(req.body.amount);
+  const { wallet, tx } = await WalletService.deposit(
+    tx,
+    amount,
+  );
 
   sendResponse(res, {
     success: true,
     statusCode: httpStatusCode.OK,
-    message: 'Wallet blocked status toggled successfully',
+    message: "Wallet blocked status toggled successfully",
     data: wallet,
   });
 });
 
-export const walletControler={
-  getMyWallet,
-  toggleWalletBlock
-}
+export const walletControler = {
+  getWallet,
+  addedMoney,
+  toggleWalletBlock,
+};

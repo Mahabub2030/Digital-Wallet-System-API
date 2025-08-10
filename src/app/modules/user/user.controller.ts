@@ -6,10 +6,17 @@ import { UserService } from "./user.service";
 import { verifyToken } from "../../../jwt";
 import { envVars } from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
+import { WallerServices } from "../wallet/wallet.service";
+import { Wallet } from "../wallet/wallet.model";
 
 
 const createUser = catchAsync(async(req: Request, res: Response, next: NextFunction)=>{
-    const user = await UserService.createUser(req.body)
+    const user = await UserService.createUser(req.body);
+    await Wallet.create({
+      userId: user._id,
+      balance: 50,
+    });
+
     sendResponse(res,{
     success: true,
         statusCode: httpStatus.CREATED,

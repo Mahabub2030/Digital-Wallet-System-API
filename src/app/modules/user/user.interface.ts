@@ -22,6 +22,7 @@ export interface IUser {
   name: string;
   email: string;
   password: string;
+  wallet:string;
   role: Role;
   auths: IAuthProvider[];
   isApproved?: boolean;

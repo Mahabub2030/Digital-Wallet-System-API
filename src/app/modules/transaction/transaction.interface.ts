@@ -16,7 +16,6 @@ export interface ITransaction {
   status: 'success' | 'failed' | 'pending';
 }
 
-
 const transactionSchema = new Schema<ITransaction>(
   {
     sender: { type: String, required: true },
