@@ -56,8 +56,44 @@ const addedMoney = async (userId: string, amount: number) => {
   }
 };
 
-const WithdrawMony = async () => {
-  return {};
+const WithdrawMony = async (userId: string, amount: number) => {
+     if (typeof amount !== "number" || amount <= 0) {
+    throw new Error("Amount must be postive");
+  }
+
+  const session = await Wallet.startSession();
+  try {
+    session.startTransaction();
+    const wallet = await Wallet.findOne({ userId }).session(session);
+    if (!wallet) throw new Error("Wallet not Found");
+    if (wallet.isBlocked) throw new Error("Wallet is Bloked");
+    wallet.balance -= amount;
+     await wallet.save({ session });
+
+      await Transaction.create(
+      [
+        {
+          type: "withdraw",
+          amount,
+          sender: userId,
+          receiver: wallet._id.toString(),
+          status: "success",
+        },
+      ],
+      { session }
+      
+    );
+        await session.commitTransaction();
+
+        return { wallet };
+  } catch (error) {
+     await session.abortTransaction();
+     console.log(error);
+    
+  }finally {
+    session.endSession();
+  }
+ 
 };
 
 const sendMony = async () => {};
@@ -80,4 +116,5 @@ const CashOutMony = async () => {
 
 export const WalletService = {
   addedMoney,
+  WithdrawMony
 };

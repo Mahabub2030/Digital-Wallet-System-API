@@ -9,6 +9,8 @@ const router = express.Router();
 
 router.get('/',checkAuth(...Object.values(Role)),walletControler.getWallets);
 router.get('/me',checkAuth(...Object.values(Role)),walletControler.getWallet);
+
 router.post('/:Id',checkAuth(...Object.values(Role.USER)) ,walletControler.addedMoney );
+router.post('/withdraw/:Id',checkAuth(...Object.values(Role.USER)) ,walletControler.withdrawMoney );
 
 export const WalletRouer =  router;

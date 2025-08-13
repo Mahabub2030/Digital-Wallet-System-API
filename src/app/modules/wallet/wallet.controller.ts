@@ -74,11 +74,25 @@ const addedMoney = catchAsync(async (req, res,tx:any) => {
   );
 
 
-
   sendResponse(res, {
     success: true,
     statusCode: httpStatusCode.OK,
     message: " Added mony successfully",
+    data: wallet,
+  });
+});
+const withdrawMoney = catchAsync(async (req, res,tx:any) => {
+  const userId = req.params.Id;
+  const amount = Number(req.body.amount);
+  const { wallet} = await WalletService.WithdrawMony(
+    userId, amount
+  );
+
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatusCode.OK,
+    message: " Money withdrawn successfully",
     data: wallet,
   });
 });
@@ -87,4 +101,5 @@ export const walletControler = {
   getWallet,
   getWallets,
   addedMoney,
+  withdrawMoney
 };
