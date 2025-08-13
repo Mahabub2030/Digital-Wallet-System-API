@@ -3,7 +3,7 @@ import { sendResponse } from "../../../utils/sendResponse";
 import { catchAsync } from "../../../utils/catchAsync";
 
 import httpStatusCode from "http-status-codes";
-import { Wallet } from "./wallet.model";
+import { IWallet, Wallet } from "./wallet.model";
 import { WalletService } from "./wallet.service";
 
 
@@ -20,6 +20,17 @@ const getWallet =catchAsync (async (req: Request, res: Response) => {
     data: wallet,
   });
 });
+const getWallets =catchAsync (async (req: Request, res: Response) => {
+  const wallet = await Wallet.find();
+
+  
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatusCode.OK,
+    message: " All Wallet fetched successfully",
+    data: wallet,
+  });
+});
 const AddWallet =catchAsync (async (req: Request, res: Response) => {
   const userId = req.params.body;
   const wallet = await Wallet.findOne({ userId });
@@ -33,7 +44,9 @@ const AddWallet =catchAsync (async (req: Request, res: Response) => {
     data: wallet,
   });
 });
-
+interface AddedMoneyResult {
+  wallet: IWallet;
+}
 //  const toggleWalletBlock = catchAsync(
 //   async (req: Request, res: Response) => {
 //     const userId = req.user?.id;
@@ -54,11 +67,10 @@ const AddWallet =catchAsync (async (req: Request, res: Response) => {
 // );
 
 const addedMoney = catchAsync(async (req, res,tx:any) => {
-  const userId = req.body;
+  const userId = req.params.Id;
   const amount = Number(req.body.amount);
   const { wallet} = await WalletService.addedMoney(
-    tx,
-    amount
+    userId, amount
   );
 
 
@@ -73,6 +85,6 @@ const addedMoney = catchAsync(async (req, res,tx:any) => {
 
 export const walletControler = {
   getWallet,
+  getWallets,
   addedMoney,
-  toggleWalletBlock,
 };

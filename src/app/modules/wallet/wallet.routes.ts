@@ -7,7 +7,8 @@ import { walletControler } from './wallet.controller';
 
 const router = express.Router();
 
+router.get('/',checkAuth(...Object.values(Role)),walletControler.getWallets);
 router.get('/me',checkAuth(...Object.values(Role)),walletControler.getWallet);
-router.patch('/wallet/:id',checkAuth(...Object.values(Role.ADMIN)) ,walletControler.toggleWalletBlock );
+router.post('/:Id',checkAuth(...Object.values(Role.USER)) ,walletControler.addedMoney );
 
 export const WalletRouer =  router;
