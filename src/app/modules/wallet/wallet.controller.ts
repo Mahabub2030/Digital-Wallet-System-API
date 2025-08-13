@@ -97,9 +97,32 @@ const withdrawMoney = catchAsync(async (req, res,tx:any) => {
   });
 });
 
+
+const sendMoney = catchAsync(async (req, res) => {
+  const senderId = req.params.senderId;
+  const receiverId = req.body.receiverId;
+  const amount = Number(req.body.amount);
+
+  const { senderWallet, receiverWallet } = await WalletService.sendMony(
+    senderId,
+    receiverId,
+    amount
+  );
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatusCode.OK,
+    message: "Money sent successfully",
+    data: { senderWallet, receiverWallet },
+  });
+});
+
+
+
 export const walletControler = {
   getWallet,
   getWallets,
   addedMoney,
-  withdrawMoney
+  withdrawMoney,
+  sendMoney
 };
