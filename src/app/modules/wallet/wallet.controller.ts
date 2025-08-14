@@ -128,6 +128,19 @@ const setBlockWallet = catchAsync(async (req, res) => {
     data: wallet,
   });
 });
+const setUnBlockWallet = catchAsync(async (req, res) => {
+  const walletId = req.params.walletId
+  const {block} = req.body
+  const wallet = await WalletService.unblockWallet(walletId,block)
+
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatusCode.OK,
+    message: " Wallet UnBloked successfully",
+    data: wallet,
+  });
+});
 
 
 
@@ -139,5 +152,6 @@ export const walletControler = {
   addedMoney,
   withdrawMoney,
   sendMoney,
-  setBlockWallet
+  setBlockWallet,
+  setUnBlockWallet
 };

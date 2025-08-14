@@ -107,20 +107,27 @@ const sendMony = async (
   try {
     session.startTransaction();
 
-    const senderWallet = await Wallet.findOne({ userId: new Types.ObjectId(senderId) }).session(session);
-    console.log(senderWallet)
+    const senderWallet = await Wallet.findOne({
+      userId: new Types.ObjectId(senderId),
+    }).session(session);
+    console.log(senderWallet);
 
     if (!senderWallet) throw new Error("Sender wallet not found");
 
-   let receiverWallet = await Wallet.findOne({
+    let receiverWallet = await Wallet.findOne({
       userId: new Types.ObjectId(receiverId),
     }).session(session);
-    console.log(receiverWallet)
+    console.log(receiverWallet);
     if (!receiverWallet) {
-     receiverWallet = await Wallet.create([{
-          userId: new Types.ObjectId(receiverId),
-          balance: 0
-        }], { session }).then(res => res[0]);
+      receiverWallet = await Wallet.create(
+        [
+          {
+            userId: new Types.ObjectId(receiverId),
+            balance: 0,
+          },
+        ],
+        { session }
+      ).then((res) => res[0]);
     }
 
     // Check sender balance
@@ -135,21 +142,29 @@ const sendMony = async (
 
     // Create transaction
     // Log transaction
-   const transaction = await Transaction.create([{
-        sender: senderId,
-        receiver: receiverId,
-        from: senderWallet._id,
-        to: receiverWallet._id,
-        amount,
-        txType: "send",
-        type: "send",
-        status: "success",
-      }], { session });
-  
+    const transaction = await Transaction.create(
+      [
+        {
+          sender: senderId,
+          receiver: receiverId,
+          from: senderWallet._id,
+          to: receiverWallet._id,
+          amount,
+          txType: "send",
+          type: "send",
+          status: "success",
+        },
+      ],
+      { session }
+    );
 
     await session.commitTransaction();
 
-   return { sender: senderWallet, receiver: receiverWallet, transaction: transaction[0] };
+    return {
+      sender: senderWallet,
+      receiver: receiverWallet,
+      transaction: transaction[0],
+    };
   } catch (error) {
     await session.abortTransaction();
     throw error;
@@ -159,17 +174,20 @@ const sendMony = async (
 };
 // for admin
 const setBlockWallet = async (walletId: string, block: boolean) => {
+  const wallet = await Wallet.findOne({ _id: new Types.ObjectId(walletId) });
+  if (!wallet) throw new Error("wallet not found");
 
-  const wallet = await Wallet.findOne({ _id: new Types.ObjectId(walletId) })
-  if(!wallet) throw new Error("wallet not found")
-
-    wallet.isBlocked = true
-    await wallet.save()
+  wallet.isBlocked = true;
+  await wallet.save();
   return wallet;
 };
 
-const unblockWallet = async () => {
-  return {};
+const unblockWallet = async (walletId: string) => {
+  const wallet = await Wallet.findOne({ _id: new Types.ObjectId(walletId) });
+  if (!wallet) throw new Error("Wallet not found");
+   wallet.isBlocked = false 
+  await wallet.save();
+  return wallet;
 };
 
 // for aggent
@@ -184,5 +202,6 @@ export const WalletService = {
   addedMoney,
   WithdrawMony,
   sendMony,
-  setBlockWallet
+  setBlockWallet,
+  unblockWallet,
 };
