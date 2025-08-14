@@ -13,5 +13,6 @@ router.get('/me',checkAuth(...Object.values(Role)),walletControler.getWallet);
 router.post('/:Id',checkAuth(...Object.values(Role.USER)) ,walletControler.addedMoney );
 router.post('/withdraw/:Id',checkAuth(...Object.values(Role.USER)) ,walletControler.withdrawMoney );
 router.post('/send/:senderId',checkAuth(...Object.values(Role.USER)) ,walletControler.sendMoney );
+router.patch("/block/:walletId",checkAuth(...Object.values(Role.ADMIN)) ,walletControler.setBlockWallet );
 
 export const WalletRouer =  router;

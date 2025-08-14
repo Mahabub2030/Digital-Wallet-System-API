@@ -113,6 +113,23 @@ const sendMoney = catchAsync(async (req, res) => {
   });
 });
 
+const setBlockWallet = catchAsync(async (req, res) => {
+
+  const walletId = req.params.walletId
+  const {block} = req.body;
+
+  const wallet = await WalletService.setBlockWallet(walletId,block)
+
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatusCode.OK,
+    message: " Wallet Bloked successfully",
+    data: wallet,
+  });
+});
+
+
 
 
 
@@ -121,5 +138,6 @@ export const walletControler = {
   getWallets,
   addedMoney,
   withdrawMoney,
-  sendMoney
+  sendMoney,
+  setBlockWallet
 };

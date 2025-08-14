@@ -112,7 +112,7 @@ const sendMony = async (
 
     if (!senderWallet) throw new Error("Sender wallet not found");
 
-    const receiverWallet = await Wallet.findOne({
+   let receiverWallet = await Wallet.findOne({
       userId: new Types.ObjectId(receiverId),
     }).session(session);
     console.log(receiverWallet)
@@ -122,8 +122,6 @@ const sendMony = async (
           balance: 0
         }], { session }).then(res => res[0]);
     }
-    
-
 
     // Check sender balance
     if (senderWallet.balance < amount) {
@@ -160,8 +158,14 @@ const sendMony = async (
   }
 };
 // for admin
-const setBlockWallet = async () => {
-  return {};
+const setBlockWallet = async (walletId: string, block: boolean) => {
+
+  const wallet = await Wallet.findOne({ _id: new Types.ObjectId(walletId) })
+  if(!wallet) throw new Error("wallet not found")
+
+    wallet.isBlocked = true
+    await wallet.save()
+  return wallet;
 };
 
 const unblockWallet = async () => {
@@ -180,4 +184,5 @@ export const WalletService = {
   addedMoney,
   WithdrawMony,
   sendMony,
+  setBlockWallet
 };
