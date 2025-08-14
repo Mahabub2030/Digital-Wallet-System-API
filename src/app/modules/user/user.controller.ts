@@ -6,7 +6,7 @@ import { UserService } from "./user.service";
 import { verifyToken } from "../../../jwt";
 import { envVars } from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
-import { WallerServices } from "../wallet/wallet.service";
+
 import { Wallet } from "../wallet/wallet.model";
 
 

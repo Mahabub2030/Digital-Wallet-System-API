@@ -58,7 +58,7 @@ const addedMoney = async (userId: string, amount: number) => {
 };
 
 const WithdrawMony = async (userId: string, amount: number) => {
-     if (typeof amount !== "number" || amount <= 0) {
+  if (typeof amount !== "number" || amount <= 0) {
     throw new Error("Amount must be postive");
   }
 
@@ -69,9 +69,9 @@ const WithdrawMony = async (userId: string, amount: number) => {
     if (!wallet) throw new Error("Wallet not Found");
     if (wallet.isBlocked) throw new Error("Wallet is Bloked");
     wallet.balance -= amount;
-     await wallet.save({ session });
+    await wallet.save({ session });
 
-      await Transaction.create(
+    await Transaction.create(
       [
         {
           type: "withdraw",
@@ -82,76 +82,82 @@ const WithdrawMony = async (userId: string, amount: number) => {
         },
       ],
       { session }
-      
     );
-        await session.commitTransaction();
+    await session.commitTransaction();
 
-        return { wallet };
+    return { wallet };
   } catch (error) {
-     await session.abortTransaction();
-     console.log(error);
-    
-  }finally {
+    await session.abortTransaction();
+    console.log(error);
+  } finally {
     session.endSession();
   }
- 
 };
 
-const sendMony = async (senderId: string, receiverId: string, amount: number)=> {
- if (typeof amount !== "number" || amount <= 0) {
+const sendMony = async (
+  senderId: string,
+  receiverId: string,
+  amount: number
+) => {
+  if (typeof amount !== "number" || amount <= 0) {
     throw new Error("Amount must be positive");
   }
 
- const session: ClientSession = await Wallet.startSession();
-try {
-     session.startTransaction();
+  const session: ClientSession = await Wallet.startSession();
+  try {
+    session.startTransaction();
+
+    const senderWallet = await Wallet.findOne({ userId: new Types.ObjectId(senderId) }).session(session);
+    console.log(senderWallet)
+
+    if (!senderWallet) throw new Error("Sender wallet not found");
+
+    const receiverWallet = await Wallet.findOne({
+      userId: new Types.ObjectId(receiverId),
+    }).session(session);
+    console.log(receiverWallet)
+    if (!receiverWallet) {
+     receiverWallet = await Wallet.create([{
+          userId: new Types.ObjectId(receiverId),
+          balance: 0
+        }], { session }).then(res => res[0]);
+    }
+    
 
 
-     const senderWallet = await Wallet.findOne({userId:new Types.ObjectId(senderId)}).session(session)
-     
-     if (!senderWallet) throw new Error("Sender wallet not found");
-
-       const receiverWallet = await Wallet.findOne({  userId: new Types.ObjectId(receiverId), })
-      .session(session)
-       if (!receiverWallet) throw new Error("Receiver wallet not found");
-        // Check sender balance
+    // Check sender balance
     if (senderWallet.balance < amount) {
       throw new Error("Insufficient balance");
     }
     senderWallet.balance -= amount;
     receiverWallet.balance += amount;
 
-
-await senderWallet.save({ session });
+    await senderWallet.save({ session });
     await receiverWallet.save({ session });
- 
-   // Create transaction
-     // Log transaction
-    await Transaction.create(
-      [
-        {
-          txType: "send",
-          amount,
-          from: senderWallet._id,
-          to: receiverWallet._id,
-          initiatedBy: new Types.ObjectId(senderId),
-          status: "completed",
-        },
-      ],
-      { session }
-    );
+
+    // Create transaction
+    // Log transaction
+   const transaction = await Transaction.create([{
+        sender: senderId,
+        receiver: receiverId,
+        from: senderWallet._id,
+        to: receiverWallet._id,
+        amount,
+        txType: "send",
+        type: "send",
+        status: "success",
+      }], { session });
+  
 
     await session.commitTransaction();
 
-    return { senderWallet, receiverWallet };
-
-} catch (error) {
+   return { sender: senderWallet, receiver: receiverWallet, transaction: transaction[0] };
+  } catch (error) {
     await session.abortTransaction();
     throw error;
   } finally {
     session.endSession();
   }
-
 };
 // for admin
 const setBlockWallet = async () => {
@@ -173,5 +179,5 @@ const CashOutMony = async () => {
 export const WalletService = {
   addedMoney,
   WithdrawMony,
-  sendMony
+  sendMony,
 };
