@@ -1,0 +1,131 @@
+import { NextFunction, Request, Response } from "express";
+import httpStatus from "http-status-codes";
+import { JwtPayload } from "jsonwebtoken";
+import AppError from "../../errorHelpers/AppError";
+import { catchAsync } from "../../utils/catchAsync";
+import { sendResponse } from "../../utils/sendResponse";
+import { IUser } from "./user.interface";
+import { UserServices } from "./user.service";
+
+const createUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = await UserServices.createUser(req.body);
+    sendResponse(res, {
+      statusCode: httpStatus.CREATED,
+      success: true,
+      message: "User Register Successfully",
+      data: user,
+    });
+  }
+);
+
+const getAllUserOrAgent = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const role = req.query.role as string;
+    if (!role) {
+      throw new AppError(400, "Role query parameter is required");
+    }
+    const users = await UserServices.getAllUserOrAgent(role.toUpperCase());
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: `${role} Retrieve Successfully`,
+      data: users,
+    });
+  }
+);
+
+//Approve Agent
+const approveAgent = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const createAgent = await UserServices.approveAgent(id);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "User has been promoted to AGENT",
+      data: createAgent,
+    });
+  }
+);
+
+//suspend Agent
+const suspendAgent = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const suspendAgent = await UserServices.suspendAgent(id);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "AGENT suspend Successfully",
+      data: suspendAgent,
+    });
+  }
+);
+
+const getMe = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const decoded = req.user as JwtPayload;
+    const user = await UserServices.getMe(decoded.id);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "You profile Retrieved Successfully",
+      data: user,
+    });
+  }
+);
+
+const blockUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id as string;
+    const user = await UserServices.blockUser(id);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "User Block Successfully",
+      data: user,
+    });
+  }
+);
+
+const unBlockUser = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id as string;
+    const user = await UserServices.unBlockUser(id);
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "User UnBlock Successfully",
+      data: user,
+    });
+  }
+);
+
+const updateUserProfile = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const payload: IUser = {
+      ...req.body,
+      picture: req.file?.path,
+    };
+    const decoded = req.user as JwtPayload;
+    const user = await UserServices.updateUserProfile(payload, decoded);
+    sendResponse(res, {
+      statusCode: httpStatus.CREATED,
+      success: true,
+      message: "Profile Update Successfully",
+      data: user,
+    });
+  }
+);
+
+export const UserControllers = {
+  createUser,
+  approveAgent,
+  suspendAgent,
+  getAllUserOrAgent,
+  getMe,
+  blockUser,
+  unBlockUser,
+  updateUserProfile,
+};

@@ -1,0 +1,22 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const multer_config_1 = require("../../config/multer.config");
+const checkAuth_1 = require("../../middlewares/checkAuth");
+const zodValidateRequest_1 = require("../../middlewares/zodValidateRequest");
+const user_controller_1 = require("./user.controller");
+const user_interface_1 = require("./user.interface");
+const user_zod_validation_1 = require("./user.zod.validation");
+const userRoute = express_1.default.Router();
+userRoute.post("/register", (0, zodValidateRequest_1.zodValidateRequest)(user_zod_validation_1.createUserZodSchema), user_controller_1.UserControllers.createUser);
+userRoute.get("/", (0, checkAuth_1.checkAuth)(...Object.values(user_interface_1.Role)), user_controller_1.UserControllers.getAllUserOrAgent);
+userRoute.get("/me", (0, checkAuth_1.checkAuth)(...Object.values(user_interface_1.Role)), user_controller_1.UserControllers.getMe);
+userRoute.patch("/updateProfile", (0, checkAuth_1.checkAuth)(...Object.values(user_interface_1.Role)), multer_config_1.multerUpload.single("file"), (0, zodValidateRequest_1.zodValidateRequest)(user_zod_validation_1.updateUserZodSchema), user_controller_1.UserControllers.updateUserProfile);
+userRoute.patch("/approve/:id", (0, checkAuth_1.checkAuth)(user_interface_1.Role.ADMIN), user_controller_1.UserControllers.approveAgent);
+userRoute.patch("/suspend/:id", user_controller_1.UserControllers.suspendAgent);
+userRoute.patch("/block/:id", user_controller_1.UserControllers.blockUser);
+userRoute.patch("/unblock/:id", user_controller_1.UserControllers.unBlockUser);
+exports.default = userRoute;

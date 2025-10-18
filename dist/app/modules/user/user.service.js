@@ -1,0 +1,178 @@
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.UserServices = void 0;
+const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const http_status_codes_1 = __importDefault(require("http-status-codes"));
+const cloudinary_config_1 = require("../../config/cloudinary.config");
+const env_1 = require("../../config/env");
+const AppError_1 = __importDefault(require("../../errorHelpers/AppError"));
+const wallet_model_1 = require("../wallet/wallet.model");
+const user_interface_1 = require("./user.interface");
+const user_model_1 = require("./user.model");
+const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const session = yield user_model_1.User.startSession();
+    session.startTransaction();
+    try {
+        const { email, password } = payload, rest = __rest(payload, ["email", "password"]);
+        const isExistUser = yield user_model_1.User.findOne({ email });
+        if (isExistUser) {
+            throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "User Already Exist");
+        }
+        const authProvider = {
+            provider: "credential",
+            providerID: email,
+        };
+        const hashPassword = yield bcryptjs_1.default.hash(password, Number(env_1.envVars.BCRYPT_SALT_ROUND));
+        const user = yield user_model_1.User.create([
+            Object.assign({ email, password: hashPassword, auths: [authProvider] }, rest),
+        ], { session });
+        const existingWallet = yield wallet_model_1.Wallet.findOne({
+            user: user[0]._id,
+        });
+        if (existingWallet) {
+            throw new AppError_1.default(http_status_codes_1.default.CONFLICT, "Wallet already exists for this user");
+        }
+        yield wallet_model_1.Wallet.create([
+            {
+                user: user[0]._id,
+                balance: 50,
+            },
+        ], { session });
+        yield session.commitTransaction();
+        session.endSession();
+        return user;
+    }
+    catch (error) {
+        yield session.abortTransaction();
+        session.endSession();
+        throw error;
+    }
+});
+const getAllUserOrAgent = (role) => __awaiter(void 0, void 0, void 0, function* () {
+    if (role !== user_interface_1.Role.USER && role !== user_interface_1.Role.ADMIN) {
+        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, `Invalid role: ${role}`);
+    }
+    const users = yield user_model_1.User.find({ role: role }).sort("-createdAt");
+    return users;
+});
+const approveAgent = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(id);
+    if (!user) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User not found");
+    }
+    if (user.isDeleted === true) {
+        throw new AppError_1.default(http_status_codes_1.default.FORBIDDEN, "This account is deleted");
+    }
+    if (user.isActive === user_interface_1.IsActive.ACTIVE) {
+        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Agent is already Approve");
+    }
+    user.isActive = user_interface_1.IsActive.ACTIVE;
+    yield user.save();
+    return user;
+});
+const suspendAgent = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(id);
+    if (!user) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User not found");
+    }
+    if (user.isDeleted === true) {
+        throw new AppError_1.default(http_status_codes_1.default.FORBIDDEN, "This account is deleted");
+    }
+    if (user.isActive === user_interface_1.IsActive.SUSPENDED) {
+        throw new AppError_1.default(http_status_codes_1.default.BAD_REQUEST, "Agent is already suspended");
+    }
+    user.isActive = user_interface_1.IsActive.SUSPENDED;
+    yield user.save();
+    return user;
+});
+const getMe = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(id).select("-password");
+    return user;
+});
+const blockUser = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(id);
+    if (!user) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User not found");
+    }
+    if (user.isActive === "BLOCKED") {
+        throw new AppError_1.default(403, "User account already blocked");
+    }
+    yield user_model_1.User.findByIdAndUpdate(id, {
+        $set: {
+            isActive: user_interface_1.IsActive.BLOCKED,
+        },
+    });
+    return null;
+});
+const unBlockUser = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(id);
+    if (!user) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User not found");
+    }
+    if (user.isActive === "ACTIVE") {
+        throw new AppError_1.default(403, "User account already Unblock");
+    }
+    yield user_model_1.User.findByIdAndUpdate(id, {
+        $set: {
+            isActive: user_interface_1.IsActive.ACTIVE,
+        },
+    });
+    return null;
+});
+const updateUserProfile = (payload, decoded) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(decoded.id);
+    if (!user) {
+        throw new AppError_1.default(http_status_codes_1.default.NOT_FOUND, "User not found");
+    }
+    if (payload.role) {
+        if (decoded.role === user_interface_1.Role.USER || decoded.role === user_interface_1.Role.AGENT) {
+            throw new AppError_1.default(http_status_codes_1.default.FORBIDDEN, "You do not have permission to change user roles");
+        }
+    }
+    if (payload.isActive || payload.isDeleted || payload.isVerified) {
+        if (decoded.role === user_interface_1.Role.USER || decoded.role === user_interface_1.Role.AGENT) {
+            throw new AppError_1.default(http_status_codes_1.default.FORBIDDEN, "You do not have permission to change user roles");
+        }
+    }
+    const updateUser = yield user_model_1.User.findByIdAndUpdate(decoded.id, payload, {
+        new: true,
+        runValidators: true,
+    });
+    if (payload.picture && user.picture) {
+        yield (0, cloudinary_config_1.deleteImageFromCLoudinary)(user.picture);
+    }
+    return updateUser;
+});
+exports.UserServices = {
+    createUser,
+    approveAgent,
+    suspendAgent,
+    getAllUserOrAgent,
+    getMe,
+    blockUser,
+    unBlockUser,
+    updateUserProfile,
+};

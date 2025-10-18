@@ -1,0 +1,179 @@
+import { Request, Response } from "express";
+import { catchAsync } from "../../utils/catchAsync";
+import { TransactionService } from "./transaction.service";
+import { sendResponse } from "../../utils/sendResponse";
+import httpStatus from "http-status-codes";
+import { ITransaction, PayType } from "./transaction.interface";
+import AppError from "../../errorHelpers/AppError";
+import { JwtPayload } from "jsonwebtoken";
+
+// add money
+const addMoney = catchAsync(async (req: Request, res: Response) => {
+  const type = PayType.ADD_MONEY;
+  const payload = req.body;
+  if (type !== payload.type) {
+    throw new AppError(400, "Transaction type mismatch. Please try again.");
+  }
+  const { role, id: userId } = req.user as JwtPayload;
+
+  const addMoney = await TransactionService.addMoney(payload, role, userId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Add Money successfully",
+    data: addMoney,
+  });
+});
+
+//withdraw Money
+const withdrawMoney = catchAsync(async (req: Request, res: Response) => {
+  const type = PayType.WITHDRAW;
+  const payload = req.body;
+  if (type !== payload.type) {
+    throw new AppError(400, "Transaction type mismatch. Please try again.");
+  }
+  const { role, id: userId } = req.user as JwtPayload;
+  const withdrawMoney = await TransactionService.withdrawMoney(
+    payload,
+    role,
+    userId
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Money withdraw successfully",
+    data: withdrawMoney,
+  });
+});
+
+//send Money
+const sendMoney = catchAsync(async (req: Request, res: Response) => {
+  const type = PayType.SEND_MONEY;
+  const payload = req.body;
+  if (type !== payload.type) {
+    throw new AppError(400, "Transaction type mismatch. Please try again.");
+  }
+  const { role, id: userId } = req.user as JwtPayload;
+  const sendMoney = await TransactionService.sendMoney(payload, role, userId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Money sent successfully",
+    data: sendMoney,
+  });
+});
+
+//get Transaction History by me
+const getTransactionHistory = catchAsync(
+  async (req: Request, res: Response) => {
+    const query = req.query;
+    const { id: userId } = req.user as JwtPayload;
+    const getTransaction = await TransactionService.getTransactionHistory(
+      userId,
+      query
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Transaction history retrieved successfully",
+      meta: getTransaction.meta,
+      data: getTransaction.transactions,
+    });
+  }
+);
+
+//get Transaction History by admin
+const getAllTransactionHistory = catchAsync(
+  async (req: Request, res: Response) => {
+    // const getAllTransaction =
+    //   await TransactionService.getAllTransactionHistory();
+    const transactionHistory = res.locals.data;
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "All transaction history retrieved successfully",
+      meta: transactionHistory.meta,
+      data: transactionHistory.data,
+    });
+  }
+);
+
+//cash in Agent
+const cashIn = catchAsync(async (req: Request, res: Response) => {
+  const type = PayType.ADD_MONEY;
+  const payload = req.body;
+  if (type !== payload.type) {
+    throw new AppError(400, "Transaction type mismatch. Please try again.");
+  }
+  const { role, id: agentId } = req.user as JwtPayload;
+  const result = await TransactionService.cashIn(payload, role, agentId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Cash in completed successfully",
+    data: result,
+  });
+});
+
+//cash out Agent
+const cashOut = catchAsync(async (req: Request, res: Response) => {
+  const type = PayType.WITHDRAW;
+  const payload = req.body;
+  if (type !== payload.type) {
+    throw new AppError(400, "Transaction type mismatch. Please try again.");
+  }
+  const { role, id: agentId } = req.user as JwtPayload;
+  const result = await TransactionService.cashOut(payload, role, agentId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Cash-out complete Successful",
+    data: result,
+  });
+});
+
+//cash out Agent
+const getTransactionSummary = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id: agentId } = req.user as JwtPayload;
+    const result = await TransactionService.getTransactionSummary(agentId);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Get Agent Summary Successfully",
+      data: result,
+    });
+  }
+);
+//cash out Agent
+const getAllTransactionVolume = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await TransactionService.getAllTransactionVolume();
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Get All Volume Successfully",
+      data: result,
+    });
+  }
+);
+
+export const TransactionController = {
+  addMoney,
+  withdrawMoney,
+  sendMoney,
+  getTransactionHistory,
+  getAllTransactionHistory,
+  cashIn,
+  cashOut,
+  getTransactionSummary,
+  getAllTransactionVolume,
+};
