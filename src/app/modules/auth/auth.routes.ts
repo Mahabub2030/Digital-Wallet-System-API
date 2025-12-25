@@ -1,9 +1,10 @@
 import express, { NextFunction, Request, Response } from "express";
 import passport from "passport";
+import { AuthController } from "./auth.controller";
+
 import { envVars } from "../../config/env";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { Role } from "../user/user.interface";
-import { AuthController } from "./auth.controller";
 
 const authRoute = express.Router();
 
@@ -15,6 +16,20 @@ authRoute.post(
   checkAuth(...Object.values(Role)),
   AuthController.changePassword
 );
+
+authRoute.post(
+  "/set-password",
+  checkAuth(...Object.values(Role)),
+  AuthController.setPassword
+);
+
+authRoute.post(
+  "/reset-password",
+  checkAuth(...Object.values(Role)),
+  AuthController.resetPassword
+);
+
+authRoute.post("/forgot-password", AuthController.forgotPassword);
 
 authRoute.get(
   "/google",

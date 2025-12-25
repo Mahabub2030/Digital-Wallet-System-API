@@ -2,12 +2,11 @@ import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import passport from "passport";
+import { envVars } from "../../config/env";
 import AppError from "../../errorHelpers/AppError";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { setAuthCookie } from "../../utils/setCookie";
-
-import { envVars } from "../../config/env";
 import { createUserTokens } from "../../utils/userToken";
 import { AuthService } from "./auth.service";
 
@@ -16,19 +15,20 @@ const createLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     passport.authenticate("local", async (err: any, user: any, info: any) => {
       if (err) {
-        return next(new AppError(401, err));
+        return next(err);
       }
       if (!user) {
         return next(new AppError(401, info.message));
       }
-      const userTokens = await createUserTokens(user);
-      const { password: pass, ...rest } = user.toObject();
+
+      const userTokens = createUserTokens(user);
+      const { password, ...rest } = user.toObject();
       setAuthCookie(res, userTokens);
 
       sendResponse(res, {
-        success: true,
         statusCode: httpStatus.OK,
-        message: "User Logged In Successfully",
+        success: true,
+        message: "User logged in successfully",
         data: {
           accessToken: userTokens.accessToken,
           refreshToken: userTokens.refreshToken,
@@ -113,10 +113,51 @@ const createNewAccessToken = catchAsync(
   }
 );
 
+const setPassword = catchAsync(async (req: Request, res: Response) => {
+  const decodedToken = req.user as JwtPayload;
+  const { password } = req.body;
+
+  await AuthService.setPassword(decodedToken, password);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Password set Successfully",
+    data: null,
+  });
+});
+
+const resetPassword = catchAsync(async (req: Request, res: Response) => {
+  const decodedToken = req.user as JwtPayload;
+  const { newPassword, id } = req.body;
+
+  await AuthService.resetPassword(decodedToken, newPassword, id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Password reset Successfully",
+    data: null,
+  });
+});
+
+const forgotPassword = catchAsync(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  await AuthService.forgotPassword(email);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Password forgot Successfully",
+    data: null,
+  });
+});
+
 export const AuthController = {
   createLogin,
   logOutUser,
   googleLogin,
   changePassword,
   createNewAccessToken,
+  setPassword,
+  resetPassword,
+  forgotPassword,
 };
