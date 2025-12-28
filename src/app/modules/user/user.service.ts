@@ -18,7 +18,6 @@ const createUser = async (payload: Partial<IUser>) => {
     if (isExistUser) {
       throw new AppError(httpStatus.BAD_REQUEST, "User Already Exist");
     }
-
     const authProvider: IAuthsProviders = {
       provider: "credential",
       providerID: email as string,

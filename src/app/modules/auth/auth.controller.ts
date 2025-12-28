@@ -20,7 +20,6 @@ const createLogin = catchAsync(
       if (!user) {
         return next(new AppError(401, info.message));
       }
-
       const userTokens = createUserTokens(user);
       const { password, ...rest } = user.toObject();
       setAuthCookie(res, userTokens);
