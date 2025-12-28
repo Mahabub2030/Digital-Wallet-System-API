@@ -25,13 +25,25 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set("trust proxy", 1);
+// app.use(
+//   cors({
+//     origin: [envVars.FRONTEND_URL],
+//     credentials: true,
+//   })
+// );
 app.use(
   cors({
-    origin: [envVars.FRONTEND_URL],
+    origin: [
+      envVars.FRONTEND_URL,
+      "https://client-n6ksm5skg-mahabub2030s-projects.vercel.app",
+      "http://localhost:5173", // for local dev (Vite)
+      "http://localhost:3000",
+    ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 //routes
 app.use("/api/v1", routes);
 

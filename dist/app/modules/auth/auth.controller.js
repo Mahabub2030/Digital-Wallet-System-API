@@ -26,29 +26,29 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
 const passport_1 = __importDefault(require("passport"));
+const env_1 = require("../../config/env");
 const AppError_1 = __importDefault(require("../../errorHelpers/AppError"));
 const catchAsync_1 = require("../../utils/catchAsync");
 const sendResponse_1 = require("../../utils/sendResponse");
 const setCookie_1 = require("../../utils/setCookie");
-const env_1 = require("../../config/env");
 const userToken_1 = require("../../utils/userToken");
 const auth_service_1 = require("./auth.service");
 // user login
 const createLogin = (0, catchAsync_1.catchAsync)((req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     passport_1.default.authenticate("local", (err, user, info) => __awaiter(void 0, void 0, void 0, function* () {
         if (err) {
-            return next(new AppError_1.default(401, err));
+            return next(err);
         }
         if (!user) {
             return next(new AppError_1.default(401, info.message));
         }
-        const userTokens = yield (0, userToken_1.createUserTokens)(user);
-        const _a = user.toObject(), { password: pass } = _a, rest = __rest(_a, ["password"]);
+        const userTokens = (0, userToken_1.createUserTokens)(user);
+        const _a = user.toObject(), { password } = _a, rest = __rest(_a, ["password"]);
         (0, setCookie_1.setAuthCookie)(res, userTokens);
         (0, sendResponse_1.sendResponse)(res, {
-            success: true,
             statusCode: http_status_codes_1.default.OK,
-            message: "User Logged In Successfully",
+            success: true,
+            message: "User logged in successfully",
             data: {
                 accessToken: userTokens.accessToken,
                 refreshToken: userTokens.refreshToken,
@@ -118,10 +118,45 @@ const createNewAccessToken = (0, catchAsync_1.catchAsync)((req, res, next) => __
         data: tokenInfo,
     });
 }));
+const setPassword = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const decodedToken = req.user;
+    const { password } = req.body;
+    yield auth_service_1.AuthService.setPassword(decodedToken, password);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Password set Successfully",
+        data: null,
+    });
+}));
+const resetPassword = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const decodedToken = req.user;
+    const { newPassword, id } = req.body;
+    yield auth_service_1.AuthService.resetPassword(decodedToken, newPassword, id);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Password reset Successfully",
+        data: null,
+    });
+}));
+const forgotPassword = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { email } = req.body;
+    yield auth_service_1.AuthService.forgotPassword(email);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Password forgot Successfully",
+        data: null,
+    });
+}));
 exports.AuthController = {
     createLogin,
     logOutUser,
     googleLogin,
     changePassword,
     createNewAccessToken,
+    setPassword,
+    resetPassword,
+    forgotPassword,
 };
