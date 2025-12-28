@@ -35,7 +35,8 @@ app.use(
   cors({
     origin: [
       envVars.FRONTEND_URL,
-      "https://client-g6zmzk7nr-mahabub2030s-projects.vercel.app", // ✅ NEW
+      "https://client-g6zmzk7nr-mahabub2030s-projects.vercel.app",
+      "https://wallet-client-one.vercel.app", // ✅ NEW
       "https://client-n6ksm5skg-mahabub2030s-projects.vercel.app", // old
       "http://localhost:5173",
       "http://localhost:3000",
