@@ -36,7 +36,6 @@ exports.app.set("trust proxy", 1);
 exports.app.use((0, cors_1.default)({
     origin: [
         env_1.envVars.FRONTEND_URL,
-        "https://client-n6ksm5skg-mahabub2030s-projects.vercel.app",
         "https://wallet-client-djrc.vercel.app",
         "http://localhost:5173", // for local dev (Vite)
         "http://localhost:3000",
