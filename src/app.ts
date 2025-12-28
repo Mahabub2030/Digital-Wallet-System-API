@@ -36,6 +36,7 @@ app.use(
     origin: [
       envVars.FRONTEND_URL,
       "https://client-n6ksm5skg-mahabub2030s-projects.vercel.app",
+      "https://wallet-client-djrc.vercel.app",
       "http://localhost:5173", // for local dev (Vite)
       "http://localhost:3000",
     ],
